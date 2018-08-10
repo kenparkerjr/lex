@@ -1,5 +1,5 @@
 #include <iostream>
-#include "lex.h"
+#include "Lex.h"
 
 using namespace std;
 
