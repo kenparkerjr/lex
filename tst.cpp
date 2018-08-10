@@ -75,8 +75,8 @@ int main(int argc, char **argv)
   mc[0] = 101;
   mc[1] = 102;
   mc[2] = 103;
-  for(auto i = mc.begin(); i != mc.end(); i++)
-    cout << *i << endl;
+  for(auto item = mc.begin(); item != mc.end(); item++)
+    cout << *item << endl;
 
   return -1;
 }
