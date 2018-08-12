@@ -1,4 +1,5 @@
 #include <string>
+#include <cstring>
 using namespace std;
 
 enum SymbolType
@@ -13,6 +14,16 @@ class Symbol
 {
 public:
   Symbol(SymbolType aType, string& aLabel, void *apValue) : type(aType), label(aLabel), pValue(apValue) {}
+  Symbol(string &aLabel, int aValue) : type(SymbolType::Int), label(aLabel)
+  {
+    pValue = new int;
+    memcpy((void*)pValue, (void *)&aValue, sizeof(int));
+  }
+  Symbol(string &aLabel, string& aValue) : type(SymbolType::String), label(aLabel)
+  {
+    pValue = new string(aValue);
+    
+  }
   const SymbolType Type() const { return type; }
   const string Label() const { return label; }
   const void *Value() const { return pValue; }

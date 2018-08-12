@@ -46,19 +46,18 @@ void Vm::Load(string path)
     
     if(t == SymbolType::String){
       string s = value.substr(1, value.length()-2);
-      symbolValue = (void*)new string(s);
-      cout << "--->" << *((string*)(symbolValue));
+      Symbol symbol(label, s);  
+      cout << "{" << (int)symbol.Type() << ":" << symbol.Label() << ":" << *((string*)symbol.Value()) << "}" << endl;
     }
     else if(t == SymbolType::Int){
       symbolValue = new int;
       int int_value = stoi(value);
-      memcpy(symbolValue, (void*)(&int_value), 1);
-      cout << "->>" <<  *((int*)(symbolValue)) << endl;  
+      Symbol symbol(label, int_value);
+    cout << "{" << (int)symbol.Type() << ":" << symbol.Label() << ":" << *((int*)symbol.Value()) << "}" << endl;
+
     }
     
-    Symbol symbol(t, label, symbolValue);
     
-    cout << "{" << (int)symbol.Type() << ":" << symbol.Label() << ":" << *((string*)symbol.Value()) << "}" << endl;
 
   }
 }
