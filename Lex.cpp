@@ -25,8 +25,8 @@ Token* Lex::Next()
 int main(int argc, char **argv)
 {
 	Lex lex("aaa;bbb;ccc;ddd;");
-	auto token = lex.Next();
-	while(token != NULL)
+	
+  for(auto token = lex.Next(); token != NULL;)
 	{
 		cout << token->Value() << endl;
 		token = lex.Next();

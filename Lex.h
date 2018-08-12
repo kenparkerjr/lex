@@ -1,6 +1,6 @@
 #include <string>
 #include "Token.h"
-
+#include "Symbol.h"
 class Lex
 {
 public:
