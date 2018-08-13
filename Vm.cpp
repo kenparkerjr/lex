@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstring>
 #include <map>
+#include <tuple>
 using namespace std;
 
 SymbolType GetTypeFromName(string name)
@@ -15,8 +16,38 @@ SymbolType GetTypeFromName(string name)
   else
     return SymbolType::Unk;
 }
+
+
 tuple<string, string, string> Vm::NextCommand(string line)
 {
+  tuple<string, string, string> cmd;
+
+  //ignore blank lines
+  if(line.size() <= 0) return cmd; 
+  
+  auto end = line.find_first_of(" ", 0);
+  end = end > line.length() ? line.length() : end; 
+  string s = line.substr(0, end);
+  get<0>(cmd) = s;
+
+  //return if it is a label
+  if(s[0] == '@') return cmd;
+  
+  //return if not a symbol
+  if(s == "jump_lt" || s == "compare" || s == "print" || s == "load" || s == "inc") return cmd;
+
+  //parse first operand
+  auto start = line.find_first_not_of(" ", end);
+  end = line.find_first_of(" ", start);
+  auto len = end - start;
+  get<1>(cmd) = line.substr(start, len);
+
+
+  start = line.find_first_not_of(" ", end);
+  end = line.find_first_of(" ", start);
+  len = end - start;
+  get<2>(cmd) = line.substr(start, len);
+  
  
 }
 void Vm::Load(string path)
@@ -29,48 +60,31 @@ void Vm::Load(string path)
 
   while(getline(f, line))
   {
-    if(line.size() <= 0) continue; //Ignore blank lines    
-
     auto cmd = NextCommand(line);
+    string command = get<0>(cmd);
+    string op1 = get<1>(cmd);
+    string op2 = get<2>(cmd);
+
+    cout << ":" << command << ":" << op1 << ":" << op2 << endl;
+
+    SymbolType t = GetTypeFromName(command);        
     
-
-    auto end_type = line.find_first_of(" ", 0);
-    end_type = end_type > line.length() ? line.length() : end_type; 
-    auto s = line.substr(0, end_type); 
-    if(s.size() > 0 && s[0] == '@')
-    {
-      cout << s << ":" << s.length() << ":" << end_type << endl;
-      string lbl = s.substr(0, end_type);
-      symbolTable->emplace(lbl, Symbol(lbl, 0));
-      continue;
-    }
-    else if(s == "jump_lt" || s == "compare" || s == "print" || s == "load" || s == "inc")
-      continue;  
- 
-    auto start_label = line.find_first_not_of(" ", end_type); 
-    auto end_label = line.find_first_of(" ", start_label);
-    auto label_size = end_label - start_label;
-    auto label = line.substr(start_label, label_size);
-
-    auto start_value = line.find_first_not_of(" ", end_label);
-    auto end_value = line.find_first_of(" ", start_value);
-    auto value = line.substr(start_value, end_value);
-
-    
-    SymbolType t = GetTypeFromName(s);        
-
     void *symbolValue;    
     
     if(t == SymbolType::String){
-      string s = value.substr(1, value.length()-2);
-      Symbol ls(label, s); 
-      symbolTable->emplace(label, ls);
+      string s = op2.substr(1, op2.length()-2);
+      Symbol ls(op1, s); 
+      symbolTable->emplace(op1, ls);
     }
     else if(t == SymbolType::Int){
       symbolValue = new int;
-      int int_value = stoi(value);
-      Symbol is(label, int_value);
-      symbolTable->emplace(label, is);
+      int int_value = stoi(op2);
+      Symbol is(op2, int_value);
+      symbolTable->emplace(op1, is);
+    }
+    else
+    {
+      cout << "NOT A SYMBOL" << endl;
     }
     
   }
