@@ -8,7 +8,8 @@ class Vm
 {
 public:
   void Load(string path);
-
+private:
+  tuple<string, string, string> NextCommand(string line);
 
 };
 
