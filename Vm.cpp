@@ -82,6 +82,10 @@ void Vm::Load(string path)
       Symbol is(op2, int_value);
       symbolTable->emplace(op1, is);
     }
+    else if(t == SymbolType::Label)
+    {
+      cout << "Label: " << command << endl;
+    }
     else
     {
       cout << "NOT A SYMBOL" << endl;
