@@ -3,20 +3,8 @@
 #include <cstring>
 #include <map>
 #include <tuple>
+#include <vector>
 using namespace std;
-
-SymbolType GetTypeFromName(string name)
-{
-  if(name == "label")
-    return SymbolType::Label;
-  else if(name == "string")
-    return SymbolType::String;
-  else if(name == "int")
-    return SymbolType::Int;
-  else
-    return SymbolType::Unk;
-}
-
 
 tuple<string, string, string> Vm::NextCommand(string line)
 {
@@ -42,7 +30,7 @@ tuple<string, string, string> Vm::NextCommand(string line)
   auto len = end - start;
   get<1>(cmd) = line.substr(start, len);
 
-
+  
   start = line.find_first_not_of(" ", end);
   end = line.find_first_of(" ", start);
   len = end - start;
@@ -50,14 +38,20 @@ tuple<string, string, string> Vm::NextCommand(string line)
   
  
 }
+using Instruction = tuple<int, int, int>;
 void Vm::Load(string path)
 {
+
+
   ifstream f(path);
 
   string line;
   
   auto symbolTable = new map<string, Symbol>();
+  
+  vector<Instruction> program;  
 
+  int pc = 0; //Program Counter
   while(getline(f, line))
   {
     auto cmd = NextCommand(line);
@@ -65,35 +59,25 @@ void Vm::Load(string path)
     string op1 = get<1>(cmd);
     string op2 = get<2>(cmd);
 
-    cout << ":" << command << ":" << op1 << ":" << op2 << endl;
-
     SymbolType t = GetTypeFromName(command);        
     
-    void *symbolValue;    
     
     if(t == SymbolType::String){
       string s = op2.substr(1, op2.length()-2);
-      Symbol ls(op1, s); 
-      symbolTable->emplace(op1, ls);
+      symbolTable->emplace(op1, Symbol(op1, s));
     }
-    else if(t == SymbolType::Int){
-      symbolValue = new int;
-      int int_value = stoi(op2);
-      Symbol is(op2, int_value);
-      symbolTable->emplace(op1, is);
-    }
+    else if(t == SymbolType::Int)
+      symbolTable->emplace(op1, Symbol(op1, stoi(op2)));
     else if(t == SymbolType::Label)
-    {
-      cout << "Label: " << command << endl;
-    }
+      symbolTable->emplace(op1, Symbol(op1, pc));
     else
-    {
-      cout << "NOT A SYMBOL" << endl;
-    }
-    
+      ; //Everything else is a command
+
+    pc++;
   }
-  for(auto x = symbolTable->begin(); x != symbolTable->end(); ++x)
-    cout << "{" << (symbolTable->find(x->first)->second).Label() << "}" <<  endl;
+
+  
+
 }
 
 int main(int argc, char **argv)

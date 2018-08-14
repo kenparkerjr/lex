@@ -24,6 +24,12 @@ public:
     pValue = new string(aValue);
     
   }
+  static Symbol CreateLabel(string aLabel, int aAddress)
+  {
+    auto paAddress = new int;
+    memcpy((void*)paAddress, (void *)&aAddress, sizeof(int));
+    return Symbol(SymbolType::Label, aLabel, paAddress);
+  }
   const SymbolType Type() const { return type; }
   const string Label() const { return label; }
   const void *Value() const { return pValue; }
@@ -32,3 +38,16 @@ private:
   const string label;
   const void *pValue; 
 };
+
+static SymbolType GetTypeFromName(string name)
+{
+  if(name == "label")
+    return SymbolType::Label;
+  else if(name == "string")
+    return SymbolType::String;
+  else if(name == "int")
+    return SymbolType::Int;
+  else
+    return SymbolType::Unk;
+}
+
