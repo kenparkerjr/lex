@@ -41,7 +41,7 @@ private:
 
 static SymbolType GetTypeFromName(string name)
 {
-  if(name == "label")
+  if(name[0] == '@')
     return SymbolType::Label;
   else if(name == "string")
     return SymbolType::String;

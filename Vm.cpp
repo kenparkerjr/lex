@@ -1,4 +1,5 @@
 #include "Vm.h"
+#include "Command.h"
 #include <iostream>
 #include <cstring>
 #include <map>
@@ -71,7 +72,12 @@ void Vm::Load(string path)
     else if(t == SymbolType::Label)
       symbolTable->emplace(op1, Symbol(op1, pc));
     else
-      ; //Everything else is a command
+    {
+      //int cmd = CommandFromName(command);
+      //cout << command << endl;
+    }
+    
+
 
     pc++;
   }
