@@ -21,6 +21,9 @@
 
 #define puti     0x0501
 #define geti     0x0502
+
+#define str     0x0700
+#define int_    0x0701 
   
 #define stp     0x0999
  
@@ -43,7 +46,8 @@ int CommandFromName(string s)
   if(s == "pushi")   return pushi;
   if(s == "puti")    return puti;
   if(s == "geti")    return geti;
-  if(s == "stp")    return stp;
-   
+  if(s == "stp")     return stp;
+  if(s == "int")     return int_;
+  if(s == "str")     return str; 
   return -1;  
 }

@@ -76,7 +76,10 @@ void Vm::Load(string path)
 }
 void Vm::LoadProgram(string path)
 {
-  vector<Instruction> program;
+  
+  //Each element can be data or instructions
+  vector<void *> program(1024);
+
   ifstream f(path);
   string line;
 
@@ -89,24 +92,43 @@ void Vm::LoadProgram(string path)
     string op1 = get<1>(cmd);
     string op2 = get<2>(cmd);
    
-    cout << command << ":" << op1 << ":" << op2 << endl;
-
     int command_code = CommandFromName(command);
-    Instruction inst;    
-    get<0>(inst) = command_code;
-  
+    cout << command_code << ":" <<  command << ":" << op1 << ":" << op2 << endl;
+
     
+    Symbol *op1_symbol;
+ 
     //replace variable with value
     if(op1[0] == '$')
     {
       string s = op1.substr(1, op1.length()-1);
       auto result = symbolTable.find(s);
       if(result != symbolTable.end())
-        cout << result->second.Offset() << endl;
+        op1_symbol = &result->second;
       else
         cout << symbolTable.size() << "NOT FOUND: [" << op1 << "]" << endl;
     }
-    program[pc] = inst;
+
+    switch(command_code)
+    {
+      case int_: {
+        void *data = (void*)new int;
+        int val = stoi(op2);
+        memcpy(data, (void*)(&val), sizeof(int));
+        program[pc] = data;
+        break;
+      }
+      case pushi: {
+        int loc = -1;       
+        cout << "op1: " <<  *(int *)(op1_symbol->Value()) << endl;
+        //stack.push_back(data);
+        break;
+      }
+      case stp: {
+        cout << "PROGRAM STOP ENCOUNTERED" << endl;
+        return;
+      }
+    }    
 
  
   }
