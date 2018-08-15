@@ -1,8 +1,10 @@
 @Data
-int     start     100
-int     end       150
+int  a 100
+int  b 150
 
 @Start
-pushi $start
-inci
+pushi $a
+pushi $b
+addi
 puti
+stp

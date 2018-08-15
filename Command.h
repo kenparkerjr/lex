@@ -22,9 +22,8 @@
 #define puti     0x0501
 #define geti     0x0502
   
-#define stop     0x0999
+#define stp     0x0999
  
-
 
 int CommandFromName(string s)
 {
@@ -41,8 +40,10 @@ int CommandFromName(string s)
   if(s == "deci")    return deci;
   if(s == "ori")     return ori;
   if(s == "xori")    return xori;
+  if(s == "pushi")   return pushi;
   if(s == "puti")    return puti;
   if(s == "geti")    return geti;
-  if(s == "stop")    return stop;
-    
+  if(s == "stp")    return stp;
+   
+  return -1;  
 }

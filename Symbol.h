@@ -13,30 +13,32 @@ enum SymbolType
 class Symbol
 {
 public:
-  Symbol(SymbolType aType, string& aLabel, void *apValue) : type(aType), label(aLabel), pValue(apValue) {}
-  Symbol(string &aLabel, int aValue) : type(SymbolType::Int), label(aLabel)
+  Symbol(SymbolType aType, string& aLabel, void *apValue, int aOffset) : type(aType), label(aLabel), pValue(apValue), offset(aOffset) {}
+  Symbol(string &aLabel, int aValue, int aOffset) : type(SymbolType::Int), label(aLabel), offset(aOffset)
   {
     pValue = new int;
     memcpy((void*)pValue, (void *)&aValue, sizeof(int));
   }
-  Symbol(string &aLabel, string& aValue) : type(SymbolType::String), label(aLabel)
+  Symbol(string &aLabel, string& aValue, int aOffset) : type(SymbolType::String), label(aLabel), offset(aOffset)
   {
     pValue = new string(aValue);
     
   }
-  static Symbol CreateLabel(string aLabel, int aAddress)
+  static Symbol CreateLabel(string aLabel, int aAddress, int aOffset)
   {
     auto paAddress = new int;
     memcpy((void*)paAddress, (void *)&aAddress, sizeof(int));
-    return Symbol(SymbolType::Label, aLabel, paAddress);
+    return Symbol(SymbolType::Label, aLabel, paAddress, aOffset);
   }
   const SymbolType Type() const { return type; }
   const string Label() const { return label; }
   const void *Value() const { return pValue; }
+  const int Offset() const { return offset; }
 private:
   const SymbolType type;
   const string label;
   const void *pValue; 
+  const int offset;
 };
 
 static SymbolType GetTypeFromName(string name)
