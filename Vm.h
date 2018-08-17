@@ -9,6 +9,7 @@ using namespace std;
 class Vm
 {
 public:
+  Symbol *GetSymbol(string name);
   void Load(string path);
   void LoadProgram(string path);
 private:

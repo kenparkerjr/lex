@@ -74,6 +74,15 @@ void Vm::Load(string path)
   }
 
 }
+Symbol *Vm::GetSymbol(string name)
+{
+  string s = name.substr(1, name.length()-1);
+  auto result = symbolTable.find(s);
+  if(result != symbolTable.end())
+    return &result->second;
+   
+  return NULL;
+}
 void Vm::LoadProgram(string path)
 {
   
@@ -83,7 +92,12 @@ void Vm::LoadProgram(string path)
   ifstream f(path);
   string line;
 
-  int pc = 0;  
+  
+
+  int pc = 0; //Program Counter
+
+  //|GT|LT|EQ
+  int cf = 0x0;  
 
   while(getline(f, line))
   {
@@ -96,18 +110,14 @@ void Vm::LoadProgram(string path)
     //cout << command_code << ":" <<  command << ":" << op1 << ":" << op2 << endl;
 
     
-    Symbol *op1_symbol;
- 
     //replace variable with value
+    Symbol *op1_symbol;
     if(op1[0] == '$')
-    {
-      string s = op1.substr(1, op1.length()-1);
-      auto result = symbolTable.find(s);
-      if(result != symbolTable.end())
-        op1_symbol = &result->second;
-      else
-        cout << symbolTable.size() << "NOT FOUND: [" << op1 << "]" << endl;
-    }
+      op1_symbol = GetSymbol(op1);
+
+    Symbol *op2_symbol;
+    if(op2[0] == '$')
+      op2_symbol = GetSymbol(op2); 
 
     switch(command_code)
     {
@@ -154,6 +164,8 @@ void Vm::LoadProgram(string path)
         //cout << "geti: " << *int_value << endl;        
       }
       case cmp: {
+        int *a = (int *)op1_symbol->Value();
+        int *b = (int *)op1_symbol->Value();
         
       }
       case stp: {
