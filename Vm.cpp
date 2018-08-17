@@ -7,6 +7,10 @@
 #include <vector>
 using namespace std;
 
+#define GT  0b0100
+#define LT  0b0010
+#define EQ  0b0001
+
 tuple<string, string, string> Vm::NextCommand(string line)
 {
   tuple<string, string, string> cmd;
@@ -96,7 +100,8 @@ void Vm::LoadProgram(string path)
 
   int pc = 0; //Program Counter
 
-  //|GT|LT|EQ
+  //|GT|LT|EQ 
+  
   int cf = 0x0;  
 
   while(getline(f, line))
@@ -107,12 +112,12 @@ void Vm::LoadProgram(string path)
     string op2 = get<2>(cmd);
    
     int command_code = CommandFromName(command);
-    //cout << command_code << ":" <<  command << ":" << op1 << ":" << op2 << endl;
+    cout << command_code << ":" <<  command << ":" << op1 << ":" << op2 << endl;
 
     
     //replace variable with value
     Symbol *op1_symbol;
-    if(op1[0] == '$')
+    if(op1[0] == '$' || op1[0] == '@')
       op1_symbol = GetSymbol(op1);
 
     Symbol *op2_symbol;
@@ -149,23 +154,36 @@ void Vm::LoadProgram(string path)
         stack.push_back(c);
 
         //cout << "addi: " << *a << " " << *b << " " << *c << endl; 
-
+        break;
       }
       case puti: {
         void *data = stack.back();
         int int_value = *((int *)data);
         cout << int_value << endl;
         stack.pop_back();
+        break;
       }
       case geti: {
         int *int_value = new int;
         cin >> *int_value;
         stack.push_back(int_value);
         //cout << "geti: " << *int_value << endl;        
+        break;
       }
       case cmp: {
         int *a = (int *)op1_symbol->Value();
-        int *b = (int *)op1_symbol->Value();
+        int *b = (int *)op2_symbol->Value();
+        cf = 0x0;
+        if( *a == *b ) cf = cf | EQ;
+        if( *a > *b) cf = cf | GT;
+        if( *a < *b) cf = cf | LT;
+        break;
+      }
+      case jmp_gt: {
+        //int *addr = (int*)op1_symbol->Value();
+        
+        cout << "jmp_gt: " << op1_symbol->Label() << endl;      
+        break;
         
       }
       case stp: {
