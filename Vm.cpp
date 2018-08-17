@@ -79,7 +79,7 @@ void Vm::LoadProgram(string path)
   
   //Each element can be data or instructions
   vector<void *> program(1024);
-
+  vector<void *> stack(1024);
   ifstream f(path);
   string line;
 
@@ -93,7 +93,7 @@ void Vm::LoadProgram(string path)
     string op2 = get<2>(cmd);
    
     int command_code = CommandFromName(command);
-    cout << command_code << ":" <<  command << ":" << op1 << ":" << op2 << endl;
+    //cout << command_code << ":" <<  command << ":" << op1 << ":" << op2 << endl;
 
     
     Symbol *op1_symbol;
@@ -116,21 +116,51 @@ void Vm::LoadProgram(string path)
         int val = stoi(op2);
         memcpy(data, (void*)(&val), sizeof(int));
         program[pc] = data;
+        //cout << pc << ":" << "int" << ":" << val;
         break;
       }
       case pushi: {
         int loc = -1;       
-        cout << "op1: " <<  *(int *)(op1_symbol->Value()) << endl;
-        //stack.push_back(data);
+        void *data = (void*)op1_symbol->Value();
+        //cout << "pushi: " <<  *(int *)(data) << endl;
+        stack.push_back(data);
         break;
       }
+      case addi: {
+        int *a = (int *)stack.back();
+        stack.pop_back();
+
+        int *b = (int *)stack.back();
+        stack.pop_back();
+
+        int *c = new int;
+        *c = *a + *b;
+        
+        stack.push_back(c);
+
+        //cout << "addi: " << *a << " " << *b << " " << *c << endl; 
+
+      }
+      case puti: {
+        void *data = stack.back();
+        int int_value = *((int *)data);
+        cout << int_value << endl;
+        stack.pop_back();
+      }
+      case geti: {
+        int *int_value = new int;
+        cin >> *int_value;
+        stack.push_back(int_value);
+        //cout << "geti: " << *int_value << endl;        
+      }
+      case cmp: {
+        
+      }
       case stp: {
-        cout << "PROGRAM STOP ENCOUNTERED" << endl;
+        //cout << "PROGRAM STOP ENCOUNTERED" << endl;
         return;
       }
     }    
-
- 
   }
  
 }
