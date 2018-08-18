@@ -7,8 +7,7 @@
 #include <vector>
 using namespace std;
 
-#define GT  0b0100
-#define LT  0b0010
+#define GT  0b0010
 #define EQ  0b0001
 
 tuple<string, string, string> Vm::NextCommand(string line)
@@ -70,7 +69,7 @@ void Vm::Load(string path)
     else if(t == SymbolType::Int)
       symbolTable.emplace(op1, Symbol(op1, stoi(op2), pc));
     else if(t == SymbolType::Label)
-      symbolTable.emplace(op1, Symbol::CreateLabel(op1, pc, pc));
+      symbolTable.emplace(command, Symbol(command, pc, pc));
     else
       ; //Do Nothing
 
@@ -84,12 +83,16 @@ Symbol *Vm::GetSymbol(string name)
   auto result = symbolTable.find(s);
   if(result != symbolTable.end())
     return &result->second;
-   
+  else
+    cout << "NOT FOUND" << name << endl; 
   return NULL;
 }
 void Vm::LoadProgram(string path)
 {
-  
+ 
+  for(auto s=symbolTable.begin(); s != symbolTable.end(); ++s)
+    cout << "Label: "  << s->second.Label() << endl ;
+ 
   //Each element can be data or instructions
   vector<void *> program(1024);
   vector<void *> stack(1024);
@@ -100,7 +103,7 @@ void Vm::LoadProgram(string path)
 
   int pc = 0; //Program Counter
 
-  //|GT|LT|EQ 
+  //|GT|EQ 
   
   int cf = 0x0;  
 
@@ -112,7 +115,7 @@ void Vm::LoadProgram(string path)
     string op2 = get<2>(cmd);
    
     int command_code = CommandFromName(command);
-    cout << command_code << ":" <<  command << ":" << op1 << ":" << op2 << endl;
+    //cout << command_code << ":" <<  command << ":" << op1 << ":" << op2 << endl;
 
     
     //replace variable with value
@@ -156,6 +159,13 @@ void Vm::LoadProgram(string path)
         //cout << "addi: " << *a << " " << *b << " " << *c << endl; 
         break;
       }
+      case inci: {
+        int *a = (int *)stack.back();
+        *a += 1;
+        
+        
+      
+      }
       case puti: {
         void *data = stack.back();
         int int_value = *((int *)data);
@@ -174,16 +184,19 @@ void Vm::LoadProgram(string path)
         int *a = (int *)op1_symbol->Value();
         int *b = (int *)op2_symbol->Value();
         cf = 0x0;
-        if( *a == *b ) cf = cf | EQ;
-        if( *a > *b) cf = cf | GT;
-        if( *a < *b) cf = cf | LT;
+        if( *a == *b ) cf |= EQ;
+        if( *a > *b) cf |= GT;
+        
+        bitset<8> x(cf);
+        
+        cout << "cmp: " << x << endl;
         break;
       }
-      case jmp_gt: {
-        //int *addr = (int*)op1_symbol->Value();
+      case jmp_lt: {
         
-        cout << "jmp_gt: " << op1_symbol->Label() << endl;      
-        break;
+        cout << "jmp_lt: " << *(int*)op1_symbol << endl;      
+        return;
+         break;
         
       }
       case stp: {

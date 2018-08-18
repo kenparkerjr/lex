@@ -24,6 +24,12 @@ public:
     pValue = new string(aValue);
     
   }
+  Symbol(string &aLabel, int aOffset) : type(SymbolType::Label), label(aLabel), offset(aOffset)
+  {
+    pValue = new int;
+    memcpy((void*)pValue, (void *)&aOffset, sizeof(int));
+
+  } 
   static Symbol CreateLabel(string aLabel, int aAddress, int aOffset)
   {
     auto paAddress = new int;
