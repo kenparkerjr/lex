@@ -66,10 +66,14 @@ void Vm::Load(string path)
       string s = op2.substr(1, op2.length()-2);
       symbolTable.emplace(op1, Symbol(op1, s, pc));
     }
-    else if(t == SymbolType::Int)
+    else if(t == SymbolType::Int){
+      op1 = "$" + op1;
       symbolTable.emplace(op1, Symbol(op1, stoi(op2), pc));
-    else if(t == SymbolType::Label)
-      symbolTable.emplace(command, Symbol(command, pc, pc));
+    }
+    else if(t == SymbolType::Label){
+      Symbol s(command, pc, pc);
+      symbolTable.emplace(command, s);
+    }
     else
       ; //Do Nothing
 
@@ -79,8 +83,7 @@ void Vm::Load(string path)
 }
 Symbol *Vm::GetSymbol(string name)
 {
-  string s = name.substr(1, name.length()-1);
-  auto result = symbolTable.find(s);
+  auto result = symbolTable.find(name);
   if(result != symbolTable.end())
     return &result->second;
   else
@@ -89,10 +92,7 @@ Symbol *Vm::GetSymbol(string name)
 }
 void Vm::LoadProgram(string path)
 {
- 
-  for(auto s=symbolTable.begin(); s != symbolTable.end(); ++s)
-    cout << "Label: "  << s->second.Label() << endl ;
- 
+
   //Each element can be data or instructions
   vector<void *> program(1024);
   vector<void *> stack(1024);
@@ -115,18 +115,24 @@ void Vm::LoadProgram(string path)
     string op2 = get<2>(cmd);
    
     int command_code = CommandFromName(command);
-    //cout << command_code << ":" <<  command << ":" << op1 << ":" << op2 << endl;
 
-    
+    cout << "command[" << command << ":" << op1 << ":" << op2 << "]" << endl;   
+ 
     //replace variable with value
     Symbol *op1_symbol;
     if(op1[0] == '$' || op1[0] == '@')
+    {
       op1_symbol = GetSymbol(op1);
-
+      int *a = (int*)op1_symbol->Value(); 
+      cout << "read" << op1_symbol->Label() << "=" << *a << endl;
+    }
     Symbol *op2_symbol;
     if(op2[0] == '$')
+    {
       op2_symbol = GetSymbol(op2); 
-
+      int *a = (int*)op2_symbol->Value();
+      cout << "read" << op2_symbol->Label() << "=" << *a << endl;
+    }
     switch(command_code)
     {
       case int_: {
@@ -162,11 +168,11 @@ void Vm::LoadProgram(string path)
       case inci: {
         int *a = (int *)stack.back();
         *a += 1;
-        
-        
-      
+        cout << "a++ :: " << *a << endl;
+        break;
       }
       case puti: {
+        cout << "puti START" << endl;
         void *data = stack.back();
         int int_value = *((int *)data);
         cout << int_value << endl;
@@ -193,10 +199,12 @@ void Vm::LoadProgram(string path)
         break;
       }
       case jmp_lt: {
-        
+        cout << "jmp START" << endl; 
         cout << "jmp_lt: " << *(int*)op1_symbol << endl;      
-        return;
-         break;
+          
+        //need to figure out how to change the pc to op1 and jump to the position listed in op1
+         
+        break;
         
       }
       case stp: {
