@@ -201,9 +201,12 @@ void Vm::LoadProgram(string path)
       case jmp_lt: {
         cout << "jmp START" << endl; 
         cout << "jmp_lt: " << *(int*)op1_symbol << endl;      
-          
-        //need to figure out how to change the pc to op1 and jump to the position listed in op1
+        
+        int *addr = (int *)op1_symbol->Value();
+       
          
+        //need to figure out how to change the pc to op1 and jump to the position listed in op1.
+        //We can't do that until we are accessing instructions using indexes and not sequential line by line. 
         break;
         
       }
