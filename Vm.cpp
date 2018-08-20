@@ -107,6 +107,7 @@ void Vm::LoadProgram(string path)
   
   int cf = 0x0;  
 
+  start_addr = 0;
   while(getline(f, line))
   {
     auto cmd = NextCommand(line);
@@ -119,36 +120,58 @@ void Vm::LoadProgram(string path)
     cout << "command[" << command << ":" << op1 << ":" << op2 << "]" << endl;   
  
     //replace variable with value
-    Symbol *op1_symbol;
+    Symbol *op1_symbol = NULL;
     if(op1[0] == '$' || op1[0] == '@')
     {
       op1_symbol = GetSymbol(op1);
       int *a = (int*)op1_symbol->Value(); 
       cout << "read" << op1_symbol->Label() << "=" << *a << endl;
     }
-    Symbol *op2_symbol;
+    Symbol *op2_symbol = NULL;
     if(op2[0] == '$')
     {
       op2_symbol = GetSymbol(op2); 
       int *a = (int*)op2_symbol->Value();
       cout << "read" << op2_symbol->Label() << "=" << *a << endl;
     }
+    if(command_code == int_)
+    {
+      void *data = (void*)new int;
+      int val = stoi(op2);
+      memcpy(data, (void*)(&val), sizeof(int));
+      program[pc] = data;
+      //cout << pc << ":" << "int" << ":" << val;
+      break;
+    }
+    else if(command_code == str)
+    {
+      void *data = (void*)(new string(op2)); //TODO:: WHAT ABOUT QUOTES?
+      program[pc] = data;
+    }
+    else if(command[0] == '@') //NOOP labels are zeros command
+    {
+      auto t = make_tuple(0, 0, 0);
+      program[pc] = (void*)&t;
+      if(command == "@Start")
+        start_addr = pc;
+    }
+    else
+    {
+      //TODO:: retrieve op values
+      auto t = make_tuple(command_code, op1_value, op2_value);
+    }
+  }
+  int pc = start_addr;
+  while(true)
+  {
     switch(command_code)
     {
-      case int_: {
-        void *data = (void*)new int;
-        int val = stoi(op2);
-        memcpy(data, (void*)(&val), sizeof(int));
-        program[pc] = data;
-        //cout << pc << ":" << "int" << ":" << val;
-        break;
-      }
       case pushi: {
         int loc = -1;       
         void *data = (void*)op1_symbol->Value();
         //cout << "pushi: " <<  *(int *)(data) << endl;
         stack.push_back(data);
-        break;
+          break;
       }
       case addi: {
         int *a = (int *)stack.back();
@@ -169,22 +192,28 @@ void Vm::LoadProgram(string path)
         int *a = (int *)stack.back();
         *a += 1;
         cout << "a++ :: " << *a << endl;
+          break;
+      }
+      case deci: {
+        int *a = (int *)stack.back();
+        *a -= 1;
+        cout << "a-- :: " << *a << endl;
         break;
       }
       case puti: {
         cout << "puti START" << endl;
         void *data = stack.back();
         int int_value = *((int *)data);
-        cout << int_value << endl;
-        stack.pop_back();
-        break;
+      cout << int_value << endl;
+      stack.pop_back();
+      break;
       }
       case geti: {
         int *int_value = new int;
         cin >> *int_value;
         stack.push_back(int_value);
         //cout << "geti: " << *int_value << endl;        
-        break;
+          break;
       }
       case cmp: {
         int *a = (int *)op1_symbol->Value();
@@ -203,12 +232,12 @@ void Vm::LoadProgram(string path)
         cout << "jmp_lt: " << *(int*)op1_symbol << endl;      
         
         int *addr = (int *)op1_symbol->Value();
+     
        
-         
         //need to figure out how to change the pc to op1 and jump to the position listed in op1.
         //We can't do that until we are accessing instructions using indexes and not sequential line by line. 
         break;
-        
+          
       }
       case stp: {
         //cout << "PROGRAM STOP ENCOUNTERED" << endl;
@@ -216,9 +245,7 @@ void Vm::LoadProgram(string path)
       }
     }    
   }
- 
 }
-
 int main(int argc, char **argv)
 {
   Vm vm;
