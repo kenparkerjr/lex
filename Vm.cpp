@@ -157,18 +157,32 @@ void Vm::LoadProgram(string path)
     }
     else
     {
-      //TODO:: retrieve op values
+      int op1_value = -1;
+      if(op1_symbol != NULL)
+        op1_value = *(int*)op1_symbol->Value();
+      
+      int op2_value = -1;
+      if(op2_symbol != NULL)
+        op2_value = *(int*)op1_symbol->Value();
+
+      cout << "command [" << command_code << ":" << op1_value << ":" << op2_value << "]" endl; 
+
       auto t = make_tuple(command_code, op1_value, op2_value);
     }
   }
   int pc = start_addr;
   while(true)
   {
+    auto ins = program[pc];
+    command_code = get<0>(ins);
+    op1_addr = get<1>(ins);
+    op2_addr = get<2>(ins);
+    
     switch(command_code)
     {
       case pushi: {
         int loc = -1;       
-        void *data = (void*)op1_symbol->Value();
+        void *data = program[op1_addr];
         //cout << "pushi: " <<  *(int *)(data) << endl;
         stack.push_back(data);
           break;
@@ -240,7 +254,7 @@ void Vm::LoadProgram(string path)
           
       }
       case stp: {
-        //cout << "PROGRAM STOP ENCOUNTERED" << endl;
+        cout << "PROGRAM STOP ENCOUNTERED" << endl;
         return;
       }
     }    
